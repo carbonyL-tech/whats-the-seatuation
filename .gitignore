@@ -1,0 +1,27 @@
+__pycache__/
+*.py[cod]
+*$py.class
+
+.venv/
+venv/
+env/
+ENV/
+
+.flaskenv
+.env
+.env.*
+
+instance/
+.pytest_cache/
+.coverage
+htmlcov/
+
+.DS_Store
+Thumbs.db
+
+*.log
+
+# Project reference materials, not required to run the demo
+*.pdf
+*.pptx
+*_extracted.txt

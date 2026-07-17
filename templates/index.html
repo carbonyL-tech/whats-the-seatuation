@@ -1,0 +1,459 @@
+﻿<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>What's the seatuation?</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+  <main class="page-shell">
+    <section class="hero">
+      <div class="hero-copy">
+        <p class="eyebrow">Ctrl+Coffee · C01-A</p>
+        <h1>What's the<br>seatuation?</h1>
+        <p class="subtitle">A lightweight scheduling demo that assigns student study slots to library seats and study areas using regret-based greedy allocation.</p>
+        <div class="hero-actions">
+          <button id="loadSample" type="button">Load Instance 2 Sample</button>
+          <button id="generateTop" class="secondary glass" type="button">Generate Schedule</button>
+        </div>
+      </div>
+      <div class="hero-card" aria-label="Algorithm summary">
+        <div class="hero-card-top">
+          <span>Algorithm</span>
+          <strong>Regret Greedy</strong>
+        </div>
+        <div class="formula-card">
+          <span>Priority</span>
+          <b>Regret &times; Duration</b>
+        </div>
+        <div class="mini-steps">
+          <span>1. Build requests</span>
+          <span>2. Rank by priority</span>
+          <span>3. Check capacity</span>
+          <span>4. Return schedule</span>
+        </div>
+      </div>
+    </section>
+
+    <section class="metric-strip" aria-label="Demo summary">
+      <div class="metric-card">
+        <span>Input style</span>
+        <strong>JSON</strong>
+        <p>Fast to edit and test.</p>
+      </div>
+      <div class="metric-card">
+        <span>Assignment unit</span>
+        <strong>Student time slot</strong>
+        <p>Each input slot stays indivisible.</p>
+      </div>
+      <div class="metric-card">
+        <span>Capacity rule</span>
+        <strong>Overlap checked</strong>
+        <p>No area exceeds capacity.</p>
+      </div>
+    </section>
+
+    <section class="grid-layout">
+      <div class="left-stack">
+        <div class="panel input-panel">
+        <div class="section-title-row">
+          <div>
+            <p class="section-kicker">Step 01</p>
+            <h2>Input data</h2>
+          </div>
+          <span class="status-pill">Editable</span>
+        </div>
+        <p class="hint">Edit the JSON fields, then generate a schedule. A time slot means the student's own expected study interval, such as 10:00-12:00.</p>
+
+        <div class="input-card">
+          <label for="areasInput">Study Areas & Capacities</label>
+          <textarea id="areasInput" spellcheck="false"></textarea>
+        </div>
+
+        <div class="input-card">
+          <label for="comfortInput">Comfort Level Table</label>
+          <textarea id="comfortInput" spellcheck="false"></textarea>
+        </div>
+
+        <div class="input-card">
+          <label for="timeSlotsInput">Expected Study Time Slots</label>
+          <textarea id="timeSlotsInput" spellcheck="false"></textarea>
+        </div>
+
+        <div class="actions sticky-actions">
+          <button id="generate" type="button">Generate Schedule</button>
+          <button id="clearOutput" class="secondary" type="button">Clear Output</button>
+        </div>
+
+        <pre id="errorBox" class="error-box" hidden></pre>
+      </div>
+
+        <div class="side-grid left-side-grid">
+          <div class="panel mini-panel">
+            <div class="section-title-row small">
+              <div>
+                <p class="section-kicker">Capacity</p>
+                <h3>Area occupancy</h3>
+              </div>
+            </div>
+            <p class="hint">Internal intervals are only used to check overlapping capacity.</p>
+            <div id="occupancyBox" class="occupancy-box">No occupancy data yet.</div>
+          </div>
+
+          <div class="panel mini-panel">
+            <div class="section-title-row small">
+              <div>
+                <p class="section-kicker">Fallback</p>
+                <h3>Unassigned requests</h3>
+              </div>
+            </div>
+            <div class="table-wrap compact">
+              <table id="unassignedTable">
+                <thead>
+                  <tr>
+                    <th>Student</th>
+                    <th>Slot</th>
+                    <th>Time</th>
+                    <th>Duration</th>
+                    <th>Priority</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr><td colspan="5" class="empty">None.</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="output-stack">
+        <div class="panel output-panel">
+          <div class="output-header">
+            <div>
+              <p class="section-kicker">Step 02</p>
+              <h2>Generated schedule</h2>
+              <p class="hint">Each row is one student input time slot assigned to one area.</p>
+            </div>
+            <div class="score-card">
+              <span>Total Effectiveness</span>
+              <strong id="totalEffectiveness">—</strong>
+            </div>
+          </div>
+
+          <div class="result-summary" aria-label="Result summary">
+            <div>
+              <span>Assigned</span>
+              <strong id="assignedCount">0</strong>
+            </div>
+            <div>
+              <span>Unassigned</span>
+              <strong id="unassignedCount">0</strong>
+            </div>
+            <div>
+              <span>Status</span>
+              <strong id="runStatus">Waiting</strong>
+            </div>
+          </div>
+
+          <div class="timeline-panel" aria-label="Visual allocation timeline">
+            <div class="timeline-header">
+              <div>
+                <p class="section-kicker">Visual output</p>
+                <h3>Daily allocation timeline</h3>
+              </div>
+              <div id="timelineLegend" class="timeline-legend"></div>
+            </div>
+            <p class="hint">Each colored block represents one assigned study time slot. Colors indicate assigned areas.</p>
+            <div id="timelineBox" class="timeline-box">No timeline generated yet.</div>
+          </div>
+
+          <div class="table-wrap schedule-wrap">
+            <table id="allocationTable">
+              <thead>
+                <tr>
+                  <th>Student</th>
+                  <th>Slot</th>
+                  <th>Time</th>
+                  <th>Area</th>
+                  <th>Comfort</th>
+                  <th>Duration</th>
+                  <th>Effectiveness</th>
+                  <th>Regret</th>
+                  <th>Priority</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr><td colspan="9" class="empty">No schedule generated yet.</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+      </div>
+    </section>
+  </main>
+
+  <script>
+    const sample = {
+      areas: {
+        "Area 1": 2,
+        "Area 2": 2,
+        "Area 3": 2
+      },
+      comfort: {
+        "Student 1": {"Area 1": 10, "Area 2": 9, "Area 3": 2},
+        "Student 2": {"Area 1": 9, "Area 2": 3, "Area 3": 9},
+        "Student 3": {"Area 1": 10, "Area 2": 1, "Area 3": 1},
+        "Student 4": {"Area 1": 9, "Area 2": 2, "Area 3": 10},
+        "Student 5": {"Area 1": 10, "Area 2": 9, "Area 3": 2},
+        "Student 6": {"Area 1": 9, "Area 2": 3, "Area 3": 9},
+        "Student 7": {"Area 1": 10, "Area 2": 8, "Area 3": 3}
+      },
+      time_slots: {
+        "Student 1": [["09:00", "11:00"], ["14:00", "16:00"]],
+        "Student 2": [["10:00", "12:00"], ["13:30", "15:30"]],
+        "Student 3": [["14:00", "17:00"]],
+        "Student 4": [["08:30", "10:30"], ["14:30", "16:30"]],
+        "Student 5": [["13:00", "15:00"], ["16:30", "18:30"]],
+        "Student 6": [["09:30", "11:30"], ["14:00", "16:00"]],
+        "Student 7": [["15:00", "18:00"]]
+      }
+    };
+
+    const areasInput = document.getElementById("areasInput");
+    const comfortInput = document.getElementById("comfortInput");
+    const timeSlotsInput = document.getElementById("timeSlotsInput");
+    const errorBox = document.getElementById("errorBox");
+    const totalEffectiveness = document.getElementById("totalEffectiveness");
+    const assignedCount = document.getElementById("assignedCount");
+    const unassignedCount = document.getElementById("unassignedCount");
+    const runStatus = document.getElementById("runStatus");
+    const allocationBody = document.querySelector("#allocationTable tbody");
+    const unassignedBody = document.querySelector("#unassignedTable tbody");
+    const occupancyBox = document.getElementById("occupancyBox");
+    const timelineBox = document.getElementById("timelineBox");
+    const timelineLegend = document.getElementById("timelineLegend");
+
+    function pretty(value) {
+      return JSON.stringify(value, null, 2);
+    }
+
+    function loadSample() {
+      areasInput.value = pretty(sample.areas);
+      comfortInput.value = pretty(sample.comfort);
+      timeSlotsInput.value = pretty(sample.time_slots);
+      clearError();
+      setStatus("Sample loaded");
+    }
+
+    function parseInputs() {
+      return {
+        areas: JSON.parse(areasInput.value),
+        comfort: JSON.parse(comfortInput.value),
+        time_slots: JSON.parse(timeSlotsInput.value)
+      };
+    }
+
+    function setStatus(text) {
+      runStatus.textContent = text;
+    }
+
+    function setError(message) {
+      errorBox.hidden = false;
+      errorBox.textContent = message;
+      setStatus("Error");
+    }
+
+    function clearError() {
+      errorBox.hidden = true;
+      errorBox.textContent = "";
+    }
+
+    function formatNumber(value) {
+      return Number.isInteger(value) ? value.toString() : value.toFixed(2);
+    }
+
+    function areaClass(area) {
+      const match = area.match(/\d+/);
+      const number = match ? Number(match[0]) : 0;
+      return `area-${((number - 1) % 6) + 1}`;
+    }
+
+    function renderAllocations(rows) {
+      if (!rows.length) {
+        allocationBody.innerHTML = '<tr><td colspan="9" class="empty">No allocations generated.</td></tr>';
+        return;
+      }
+      allocationBody.innerHTML = rows.map(row => `
+        <tr>
+          <td><strong>${row.student}</strong></td>
+          <td>${row.slot}</td>
+          <td>${row.start}-${row.end}</td>
+          <td><span class="area-pill ${areaClass(row.area)}">${row.area}</span></td>
+          <td>${formatNumber(row.comfort)}</td>
+          <td>${row.duration} min</td>
+          <td><strong>${formatNumber(row.effectiveness)}</strong></td>
+          <td>${formatNumber(row.regret)}</td>
+          <td>${formatNumber(row.priority)}</td>
+        </tr>
+      `).join("");
+    }
+
+    function renderUnassigned(rows) {
+      if (!rows.length) {
+        unassignedBody.innerHTML = '<tr><td colspan="5" class="empty">None.</td></tr>';
+        return;
+      }
+      unassignedBody.innerHTML = rows.map(row => `
+        <tr>
+          <td>${row.student}</td>
+          <td>${row.slot}</td>
+          <td>${row.start}-${row.end}</td>
+          <td>${row.duration} min</td>
+          <td>${formatNumber(row.priority)}</td>
+        </tr>
+      `).join("");
+    }
+
+    function renderOccupancy(rows) {
+      if (!rows.length) {
+        occupancyBox.textContent = "No occupancy data.";
+        return;
+      }
+      occupancyBox.innerHTML = rows.map(row => {
+        const areas = Object.entries(row.areas)
+          .map(([area, count]) => `<span class="${areaClass(area)}"><strong>${area}</strong>${count}</span>`)
+          .join("");
+        return `<div class="occupancy-row"><b>${row.interval}</b>${areas}</div>`;
+      }).join("");
+    }
+
+    function timeToMinutes(value) {
+      const parts = value.split(":").map(Number);
+      return parts[0] * 60 + parts[1];
+    }
+
+    function minutesToTime(value) {
+      const hours = Math.floor(value / 60).toString().padStart(2, "0");
+      const minutes = (value % 60).toString().padStart(2, "0");
+      return hours + ":" + minutes;
+    }
+
+    function buildTimelineTicks(start, end) {
+      const first = Math.floor(start / 60) * 60;
+      const last = Math.ceil(end / 60) * 60;
+      const ticks = [];
+      for (let minute = first; minute <= last; minute += 60) {
+        ticks.push(minute);
+      }
+      return ticks;
+    }
+
+    function renderTimeline(rows) {
+      if (!rows.length) {
+        timelineLegend.innerHTML = "";
+        timelineBox.textContent = "No timeline generated yet.";
+        return;
+      }
+
+      const starts = rows.map(row => timeToMinutes(row.start));
+      const ends = rows.map(row => timeToMinutes(row.end));
+      const minTime = Math.min(...starts);
+      const maxTime = Math.max(...ends);
+      const padding = 30;
+      const timelineStart = Math.max(0, Math.floor((minTime - padding) / 30) * 30);
+      const timelineEnd = Math.min(24 * 60, Math.ceil((maxTime + padding) / 30) * 30);
+      const timelineDuration = Math.max(1, timelineEnd - timelineStart);
+      const ticks = buildTimelineTicks(timelineStart, timelineEnd);
+      const students = [...new Set(rows.map(row => row.student))].sort((a, b) => a.localeCompare(b, undefined, {numeric: true}));
+      const areas = [...new Set(rows.map(row => row.area))].sort((a, b) => a.localeCompare(b, undefined, {numeric: true}));
+
+      timelineLegend.innerHTML = areas.map(area => '<span class="legend-pill ' + areaClass(area) + '">' + area + '</span>').join("");
+
+      const tickHtml = ticks.map(tick => {
+        const left = ((tick - timelineStart) / timelineDuration) * 100;
+        return '<span class="timeline-tick" style="left:' + left + '%">' + minutesToTime(tick) + '</span>';
+      }).join("");
+
+      const gridHtml = ticks.map(tick => {
+        const left = ((tick - timelineStart) / timelineDuration) * 100;
+        return '<span class="timeline-grid-line" style="left:' + left + '%"></span>';
+      }).join("");
+
+      const rowsHtml = students.map(student => {
+        const blocks = rows
+          .filter(row => row.student === student)
+          .map(row => {
+            const start = timeToMinutes(row.start);
+            const end = timeToMinutes(row.end);
+            const left = ((start - timelineStart) / timelineDuration) * 100;
+            const width = ((end - start) / timelineDuration) * 100;
+            return '<div class="timeline-block ' + areaClass(row.area) + '" style="left:' + left + '%; width:' + width + '%;" title="' + row.student + ' - ' + row.start + '-' + row.end + ' - ' + row.area + '"><strong>' + row.area + '</strong><span>' + row.start + '-' + row.end + '</span></div>';
+          }).join("");
+        return '<div class="timeline-row"><div class="timeline-student">' + student + '</div><div class="timeline-track">' + gridHtml + blocks + '</div></div>';
+      }).join("");
+
+      timelineBox.innerHTML = '<div class="timeline-scale"><div class="timeline-student spacer"></div><div class="timeline-track scale-track">' + tickHtml + '</div></div><div class="timeline-rows">' + rowsHtml + '</div>';
+    }
+
+    async function generateSchedule() {
+      clearError();
+      setStatus("Running");
+      let payload;
+      try {
+        payload = parseInputs();
+      } catch (error) {
+        setError(`Invalid JSON: ${error.message}`);
+        return;
+      }
+
+      try {
+        const response = await fetch("/allocate", {
+          method: "POST",
+          headers: {"Content-Type": "application/json"},
+          body: JSON.stringify(payload)
+        });
+        const result = await response.json();
+        if (!response.ok) {
+          throw new Error(result.error || "Allocation failed");
+        }
+        const allocations = result.allocations || [];
+        const unassigned = result.unassigned || [];
+        totalEffectiveness.textContent = formatNumber(result.total_effectiveness);
+        assignedCount.textContent = allocations.length;
+        unassignedCount.textContent = unassigned.length;
+        setStatus(unassigned.length ? "Partial" : "Complete");
+        renderAllocations(allocations);
+        renderUnassigned(unassigned);
+        renderOccupancy(result.intervals || []);
+        renderTimeline(allocations);
+      } catch (error) {
+        setError(error.message);
+      }
+    }
+
+    function clearOutput() {
+      totalEffectiveness.textContent = "—";
+      assignedCount.textContent = "0";
+      unassignedCount.textContent = "0";
+      setStatus("Waiting");
+      allocationBody.innerHTML = '<tr><td colspan="9" class="empty">No schedule generated yet.</td></tr>';
+      unassignedBody.innerHTML = '<tr><td colspan="5" class="empty">None.</td></tr>';
+      occupancyBox.textContent = "No occupancy data yet.";
+      timelineLegend.innerHTML = "";
+      timelineBox.textContent = "No timeline generated yet.";
+      clearError();
+    }
+
+    document.getElementById("loadSample").addEventListener("click", loadSample);
+    document.getElementById("generate").addEventListener("click", generateSchedule);
+    document.getElementById("generateTop").addEventListener("click", generateSchedule);
+    document.getElementById("clearOutput").addEventListener("click", clearOutput);
+
+    loadSample();
+  </script>
+</body>
+</html>
+
