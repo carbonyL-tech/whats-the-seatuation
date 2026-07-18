@@ -35,6 +35,7 @@ def create_requests(time_slots):
                     "start_minutes": start_minutes,
                     "end_minutes": end_minutes,
                     "duration": end_minutes - start_minutes,
+                    "input_order": len(requests),
                 }
             )
     return requests
@@ -111,10 +112,9 @@ def allocate_study_areas(capacities, comfort, time_slots):
     requests.sort(
         key=lambda req: (
             -req["priority"],
-            -req["regret"],
+            req["regret"],
             -req["duration"],
-            req["student"],
-            req["slot_index"],
+            req["input_order"],
         )
     )
 
