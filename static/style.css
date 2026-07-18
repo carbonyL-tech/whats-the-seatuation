@@ -888,6 +888,171 @@ tr:last-child td {
   }
 }
 
-.left-side-grid {
-  grid-template-columns: 1fr !important;
+.editor-toolbar {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin: 18px 0 10px;
+}
+
+.editor-card {
+  margin-top: 16px;
+  border: 1px solid #dce7f3;
+  border-radius: 22px;
+  padding: 16px;
+  background: rgba(248, 251, 255, 0.78);
+}
+
+.editor-card-header {
+  margin-bottom: 12px;
+}
+
+.areas-editor,
+.students-editor {
+  display: grid;
+  gap: 12px;
+}
+
+.form-row,
+.student-card-header {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 120px auto;
+  gap: 10px;
+  align-items: center;
+}
+
+.student-card {
+  display: grid;
+  gap: 12px;
+  border: 1px solid #e3ebf5;
+  border-radius: 18px;
+  padding: 14px;
+  background: white;
+}
+
+.student-card-header {
+  grid-template-columns: minmax(0, 1fr) auto;
+}
+
+.slot-list {
+  display: grid;
+  gap: 10px;
+}
+
+.slot-row {
+  grid-template-columns: 120px auto 120px auto;
+}
+
+.slot-separator {
+  color: #6c7a8c;
+  font-size: 0.9rem;
+  font-weight: 700;
+  text-align: center;
+}
+
+.text-input,
+.number-input,
+.time-input {
+  width: 100%;
+  min-width: 0;
+  border: 1px solid #d4deeb;
+  border-radius: 14px;
+  padding: 10px 12px;
+  background: #fcfeff;
+  color: #12223a;
+  font: inherit;
+}
+
+.number-input,
+.time-input {
+  max-width: 160px;
+}
+
+.comfort-table-wrap {
+  overflow: auto;
+}
+
+.comfort-table {
+  width: 100%;
+  min-width: 520px;
+  border-collapse: collapse;
+}
+
+.comfort-table th,
+.comfort-table td {
+  padding: 10px 12px;
+}
+
+.comfort-student-name {
+  font-weight: 800;
+  color: #203a5a;
+}
+
+.comfort-input {
+  max-width: 110px;
+}
+
+.tiny-danger {
+  border: 0;
+  border-radius: 999px;
+  padding: 10px 14px;
+  background: #f3dfe1;
+  color: #a1414f;
+  font-weight: 800;
+}
+
+.add-slot-btn {
+  justify-self: start;
+}
+
+@media (max-width: 760px) {
+  .form-row,
+  .student-card-header,
+  .slot-row {
+    grid-template-columns: 1fr;
+  }
+
+  .number-input,
+  .time-input {
+    max-width: 100%;
+  }
+}
+.slot-list {
+  display: grid;
+  gap: 10px;
+  overflow-x: auto;
+  padding-bottom: 4px;
+}
+
+.slot-row {
+  min-width: 620px;
+}
+
+.student-card {
+  overflow: hidden;
+}
+
+@media (max-width: 760px) {
+  .slot-row {
+    min-width: 0;
+  }
+}
+.slot-row {
+  min-width: 0;
+  display: grid;
+  grid-template-columns: minmax(130px, 1fr) 44px minmax(130px, 1fr) auto;
+  gap: 10px;
+  align-items: center;
+}
+
+.time-input {
+  max-width: none;
+}
+
+.student-card {
+  overflow-x: auto;
+}
+
+.slot-list {
+  min-width: 0;
 }
