@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>What's the seatuation?</title>
+  <title>What's the Seatuation?</title>
   <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
   <script defer src="{{ url_for('static', filename='app.js') }}"></script>
 </head>
@@ -12,9 +12,10 @@
     <section class="hero">
       <div class="hero-copy">
         <p class="eyebrow">Ctrl+Coffee - C01-A</p>
-        <h1>What's the<br>seatuation?</h1>
+        <h1>What's the<br>Seatuation?</h1>
         <p class="subtitle">A lightweight scheduling demo that assigns student study slots to library seats and study areas using regret-based greedy allocation.</p>
         <div class="hero-actions">
+          <button id="loadInstance1" type="button" class="secondary glass">Load Instance 1 Sample</button>
           <button id="loadSample" type="button">Load Instance 2 Sample</button>
           <button id="generateTop" class="secondary glass" type="button">Generate Schedule</button>
         </div>
@@ -25,8 +26,8 @@
           <strong>Regret Greedy</strong>
         </div>
         <div class="formula-card">
-          <span>Priority</span>
-          <b>Regret &times; Duration</b>
+          <span>Priority (the value of DropValue)</span>
+          <b>DropValue = Regret &times; Duration</b>
         </div>
         <div class="mini-steps">
           <span>1. Build requests</span>
@@ -121,7 +122,7 @@
             </div>
             <div class="score-card">
               <span>Total Effectiveness</span>
-              <strong id="totalEffectiveness">?</strong>
+              <strong id="totalEffectiveness">—</strong>
             </div>
           </div>
 
@@ -164,7 +165,7 @@
                   <th>Duration</th>
                   <th>Effectiveness</th>
                   <th>Regret</th>
-                  <th>Priority</th>
+                  <th>Priority<br><small>(DropValue)</small></th>
                 </tr>
               </thead>
               <tbody>
@@ -201,7 +202,7 @@
                     <th>Slot</th>
                     <th>Time</th>
                     <th>Duration</th>
-                    <th>Priority</th>
+                    <th>Priority<br><small>(DropValue)</small></th>
                   </tr>
                 </thead>
                 <tbody>

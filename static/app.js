@@ -1,4 +1,4 @@
-const sample = {
+const instance2Sample = {
   areas: [
     { id: 'area-1', name: 'Area 1', capacity: 2 },
     { id: 'area-2', name: 'Area 2', capacity: 2 },
@@ -50,7 +50,54 @@ const sample = {
   ]
 };
 
-let state = structuredClone(sample);
+const instance1Sample = {
+  areas: [
+    { id: 'area-1', name: 'Area 1', capacity: 1 },
+    { id: 'area-2', name: 'Area 2', capacity: 2 },
+    { id: 'area-3', name: 'Area 3', capacity: 2 },
+    { id: 'area-4', name: 'Area 4', capacity: 2 }
+  ],
+  students: [
+    {
+      id: 'student-1',
+      name: 'Student 1',
+      timeSlots: [{ start: '08:30', end: '10:15' }, { start: '11:30', end: '13:45' }],
+      comfort: { 'Area 1': 10, 'Area 2': 6, 'Area 3': 8, 'Area 4': 7 }
+    },
+    {
+      id: 'student-2',
+      name: 'Student 2',
+      timeSlots: [{ start: '09:30', end: '12:30' }],
+      comfort: { 'Area 1': 6, 'Area 2': 2, 'Area 3': 10, 'Area 4': 1 }
+    },
+    {
+      id: 'student-3',
+      name: 'Student 3',
+      timeSlots: [{ start: '09:00', end: '10:45' }, { start: '11:15', end: '14:00' }],
+      comfort: { 'Area 1': 6, 'Area 2': 2, 'Area 3': 10, 'Area 4': 10 }
+    },
+    {
+      id: 'student-4',
+      name: 'Student 4',
+      timeSlots: [{ start: '08:45', end: '09:45' }, { start: '11:00', end: '13:00' }],
+      comfort: { 'Area 1': 8, 'Area 2': 2, 'Area 3': 2, 'Area 4': 1 }
+    },
+    {
+      id: 'student-5',
+      name: 'Student 5',
+      timeSlots: [{ start: '08:15', end: '09:30' }, { start: '10:00', end: '12:00' }, { start: '12:30', end: '15:30' }],
+      comfort: { 'Area 1': 6, 'Area 2': 2, 'Area 3': 2, 'Area 4': 1 }
+    },
+    {
+      id: 'student-6',
+      name: 'Student 6',
+      timeSlots: [{ start: '08:00', end: '09:00' }, { start: '10:00', end: '15:00' }],
+      comfort: { 'Area 1': 10, 'Area 2': 10, 'Area 3': 2, 'Area 4': 10 }
+    }
+  ]
+};
+
+let state = structuredClone(instance2Sample);
 let nextAreaId = 4;
 let nextStudentId = 8;
 
@@ -101,6 +148,25 @@ function buildTimelineTicks(start, end) {
     ticks.push(minute);
   }
   return ticks;
+}
+
+
+function loadInputSample(sampleData, label) {
+  state = clone(sampleData);
+  nextAreaId = state.areas.length + 1;
+  nextStudentId = state.students.length + 1;
+  clearError();
+  clearOutput();
+  renderAllInputs();
+  setStatus(`${label} loaded`);
+}
+
+function loadInstance1Sample() {
+  loadInputSample(instance1Sample, 'Instance 1');
+}
+
+function loadInstance2Sample() {
+  loadInputSample(instance2Sample, 'Instance 2');
 }
 
 function setStatus(text) {
@@ -461,7 +527,7 @@ async function generateSchedule() {
 }
 
 function clearOutput() {
-  totalEffectiveness.textContent = '¡ª';
+  totalEffectiveness.textContent = '?';
   assignedCount.textContent = '0';
   unassignedCount.textContent = '0';
   setStatus('Waiting');
@@ -538,7 +604,8 @@ comfortEditor.addEventListener('input', event => {
   student.comfort[areaName] = target.value;
 });
 
-document.getElementById('loadSample').addEventListener('click', loadSample);
+document.getElementById('loadInstance1').addEventListener('click', loadInstance1Sample);
+document.getElementById('loadSample').addEventListener('click', loadInstance2Sample);
 document.getElementById('generate').addEventListener('click', generateSchedule);
 document.getElementById('generateTop').addEventListener('click', generateSchedule);
 document.getElementById('clearOutput').addEventListener('click', clearOutput);
