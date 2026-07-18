@@ -2,7 +2,14 @@
 
 A Flask demo for generating library seat / study-area allocation schedules using a regret-based greedy algorithm.
 
-The app takes study area capacities, student comfort scores, and student expected study time slots as input. It then generates:
+The app lets you build input data with dynamic forms instead of hand-writing JSON. You can:
+
+- add or remove study areas;
+- add or remove students;
+- add multiple study time slots for each student;
+- edit comfort scores in an auto-generated matrix.
+
+It then generates:
 
 - an allocation table;
 - total study effectiveness;
@@ -84,6 +91,13 @@ Then open:
 http://127.0.0.1:5000
 ```
 
+## How to use the demo
+
+1. Click **Load Instance 2 Sample** to populate the page with example data.
+2. Edit study areas, student names, capacities, comfort scores, and time slots.
+3. Click **Generate Schedule**.
+4. Read the generated schedule, capacity checks, unassigned requests, and timeline on the right.
+
 ## Algorithm idea
 
 Each student-provided study time slot is treated as an indivisible request. For each request, the backend computes:
@@ -97,42 +111,19 @@ Requests with higher priority are assigned first. For each request, the algorith
 
 This is a greedy heuristic, so it is designed to produce a reasonable feasible schedule, but it does not guarantee a globally optimal solution.
 
-## Input format
+## Input behavior
 
-The page accepts three JSON inputs:
+The current UI uses dynamic form editors rather than raw JSON:
 
-- study areas and capacities;
-- comfort scores for each student-area pair;
-- student expected study time slots.
+- areas are edited as rows with name and capacity;
+- students are edited as cards with one or more time slots;
+- comfort scores are edited in a matrix that updates automatically when areas or students change.
 
-Example area input:
+Time slots use `HH:MM` format, for example:
 
-```json
-{
-  "Area 1": 2,
-  "Area 2": 2,
-  "Area 3": 2,
-  "Area 4": 1
-}
-```
-
-Example comfort input:
-
-```json
-{
-  "Student 1": {"Area 1": 10, "Area 2": 9, "Area 3": 2, "Area 4": 6},
-  "Student 2": {"Area 1": 9, "Area 2": 3, "Area 3": 9, "Area 4": 8}
-}
-```
-
-Example time-slot input:
-
-```json
-{
-  "Student 1": [["09:00", "11:00"], ["14:00", "16:00"]],
-  "Student 2": [["10:00", "12:00"]]
-}
-```
+- `09:00`
+- `10:30`
+- `14:45`
 
 Each student-provided time slot is assigned to exactly one study area for its whole duration.
 
@@ -172,4 +163,4 @@ http://127.0.0.1:5000
 
 Check that every student has a comfort score for every area listed in the area capacity input.
 
-For example, if the area input contains `Area 4`, then every student in the comfort table must also have an `Area 4` score.
+For example, if the area input contains `Area 4`, then every student in the comfort matrix must also have an `Area 4` score.
